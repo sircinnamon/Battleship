@@ -6,7 +6,7 @@ public class Ship
 	public boolean[] hits;
 	public String name;
 
-	public Ship(String[] coords)
+	public Ship(String[] coords, String name)
 	{
 		size = coords.length;
 		this.coords = coords;

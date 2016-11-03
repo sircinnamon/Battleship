@@ -1,3 +1,5 @@
+import java.util.Scanner;
+import java.util.Random;
 public class Battleship
 {
 	//COORDS IN 1A format
@@ -17,18 +19,31 @@ public class Battleship
 		/*
 		System.out.println(validPlacement(playerBoard, "0A",0,3));
 		System.out.println(validPlacement(playerBoard, "0A",2,3));
-		Ship testShip = new Ship(new String[]{"0A","1A","2A"});
+		Ship testShip = new Ship(new String[]{"0A","1A","2A"}, "test");
 		placeOnBoard(playerBoard,testShip);
 		printBoards(playerBoard,computerBoard, true);
 		System.out.println(validPlacement(playerBoard, "0A",1,3));
 		*/
 		//TEST HIDE ENEMY
 		/*
-		Ship testShip2 = new Ship(new String[]{"0A","1A","2A"});
+		Ship testShip2 = new Ship(new String[]{"0A","1A","2A"}, "test2");
 		placeOnBoard(computerBoard,testShip2);
 		printBoards(playerBoard,computerBoard, true);
 		printBoards(playerBoard,computerBoard, false);
 		*/
+		//TEST PROMPT
+		/*
+		Ship testShip3 = promptPlacement(playerBoard"test3",4);
+		placeOnBoard(playerBoard,testShip3);
+		printBoards(playerBoard,computerBoard, true);
+		*/
+		//TEST SHIP INITS
+		/*
+		initializePlayerBoard(playerBoard);
+		initializeComputerBoard(computerBoard);
+		printBoards(playerBoard,computerBoard, false);
+		*/
+		
 	}
 
 	public static void printBoards(char[][] player, char[][] computer, boolean hideEnemy)
@@ -55,6 +70,133 @@ public class Battleship
 			}
 			System.out.print((i)+"\n");
 		}
+	}
+
+	public static Ship[] initializePlayerBoard(char[][] board)
+	{
+		Ship[] playerShips = new Ship[7];
+
+		playerShips[0] = promptPlacement(board, "Aircraft Carrier",5);
+		placeOnBoard(board,playerShips[0]);
+		printBoards(board,computerBoard, true);
+
+		playerShips[1] = promptPlacement(board, "Battleship",4);
+		placeOnBoard(board,playerShips[1]);
+		printBoards(board,computerBoard, true);
+
+		playerShips[2] = promptPlacement(board, "Cruiser",3);
+		placeOnBoard(board,playerShips[2]);
+		printBoards(board,computerBoard, true);
+
+		playerShips[3] = promptPlacement(board, "Destroyer",2);
+		placeOnBoard(board,playerShips[3]);
+		printBoards(board,computerBoard, true);
+		
+		playerShips[4] = promptPlacement(board, "Destroyer",2);
+		placeOnBoard(board,playerShips[4]);
+		printBoards(board,computerBoard, true);
+		
+		playerShips[5] = promptPlacement(board, "Submarine",1);
+		placeOnBoard(board,playerShips[5]);
+		printBoards(board,computerBoard, true);
+
+		playerShips[6] = promptPlacement(board, "Submarine",1);
+		placeOnBoard(board,playerShips[6]);
+		printBoards(board,computerBoard, true);
+
+		return playerShips;
+
+	}
+
+	public static Ship[] initializeComputerBoard(char[][] board)
+	{
+		Ship[] computerShips = new Ship[7];
+
+		computerShips[0] = genPlacement(board, "Aircraft Carrier",5);
+		placeOnBoard(board, computerShips[0]);
+
+		computerShips[1] = genPlacement(board, "Battleship",4);
+		placeOnBoard(board, computerShips[1]);
+
+		computerShips[2] = genPlacement(board, "Cruiser",3);
+		placeOnBoard(board, computerShips[2]);
+
+		computerShips[3] = genPlacement(board, "Destroyer",2);
+		placeOnBoard(board, computerShips[3]);
+
+		computerShips[4] = genPlacement(board, "Destroyer",2);
+		placeOnBoard(board, computerShips[4]);
+
+		computerShips[5] = genPlacement(board, "Submarine",1);
+		placeOnBoard(board, computerShips[5]);
+
+		computerShips[6] = genPlacement(board, "Submarine",1);
+		placeOnBoard(board, computerShips[6]);
+
+		return computerShips;
+	}
+
+	public static Ship genPlacement(char[][] board, String name, int size)
+	{
+		Random r = new Random();
+		boolean valid = false;
+		int[] coord = new int[2];
+		int direction;
+		do
+		{
+			coord[0] = r.nextInt(10);
+			coord[1] = r.nextInt(10);
+			direction = r.nextInt(4);
+			valid = validPlacement(board, intToCoords(coord), direction, size);
+		}while(!valid);
+		String[] coords = new String[size];
+		for(int i=0; i<size;i++)
+		{
+			coords[i] = intToCoords(coord);
+			if(direction==0){coord[0]--;}
+			else if(direction==1){coord[1]++;}
+			else if(direction==2){coord[0]++;}
+			else if(direction==3){coord[1]--;}
+		}
+		Ship ship = new Ship(coords, name);
+		return ship;
+	}
+
+	public static Ship promptPlacement(char[][] board, String name, int size)
+	{
+		Scanner scan = new Scanner(System.in);
+		Boolean valid = false;
+		String coord;
+		int direction;
+		do
+		{
+			System.out.print("Please place your "+name+" (size: "+size+"): ");
+			coord = scan.nextLine();
+			if(size == 1){direction = 0;}
+			else
+			{
+				System.out.print("Please choose a direction - 0-Up 1-Right 2-Down 3-Left:");
+				direction = scan.nextInt();
+				scan.nextLine(); //consume newline on int input
+			}
+			if(coord.matches("[0-9][A-Ja-j]") && direction >= 0 && direction <4)
+			{
+				valid = validPlacement(board, coord, direction, size);
+			}
+			if(!valid){System.out.println("Invalid placement, please try again.\n");}
+		}while(!valid);
+		String[] coords = new String[size];
+		int[] ints = coordsToInt(coord);
+		for(int i=0; i<size;i++)
+		{
+			coords[i] = intToCoords(ints);
+			if(direction==0){ints[0]--;}
+			else if(direction==1){ints[1]++;}
+			else if(direction==2){ints[0]++;}
+			else if(direction==3){ints[1]--;}
+		}
+		Ship ship = new Ship(coords, name);
+		return ship;
 	}
 
 	public static boolean validPlacement(char[][] board, String startCoord, int direction, int size)
