@@ -10,40 +10,120 @@ public class Battleship
 		playerBoard = createBoard();
 		computerBoard = createBoard();
 		printBoards(playerBoard,computerBoard, true);
-		//TEST COORDS
-		/*
-		System.out.println(intToCoords(new int[]{1,1}));
-		System.out.println(coordsToInt("A5")[0] + "," + coordsToInt("A5")[1]);
-		*/
-		//TEST PLACING
-		/*
-		System.out.println(validPlacement(playerBoard, "0A",0,3));
-		System.out.println(validPlacement(playerBoard, "0A",2,3));
-		Ship testShip = new Ship(new String[]{"0A","1A","2A"}, "test");
-		placeOnBoard(playerBoard,testShip);
-		printBoards(playerBoard,computerBoard, true);
-		System.out.println(validPlacement(playerBoard, "0A",1,3));
-		*/
-		//TEST HIDE ENEMY
-		/*
-		Ship testShip2 = new Ship(new String[]{"0A","1A","2A"}, "test2");
-		placeOnBoard(computerBoard,testShip2);
-		printBoards(playerBoard,computerBoard, true);
+		Ship[] playerShips = initializePlayerBoard(playerBoard);
+		Ship[] computerShips = initializeComputerBoard(computerBoard);
+		boolean playerWon = false;
+		boolean computerWon = false;
+		int turns = 1;
+		while(!playerWon && !computerWon)
+		{
+			playerWon = playerTurn(computerBoard, computerShips);
+			//printBoards(playerBoard,computerBoard, true);
+			computerWon = computerTurn(playerBoard, computerShips);
+			printBoards(playerBoard,computerBoard, true);
+			turns++;
+		}
 		printBoards(playerBoard,computerBoard, false);
-		*/
-		//TEST PROMPT
-		/*
-		Ship testShip3 = promptPlacement(playerBoard"test3",4);
-		placeOnBoard(playerBoard,testShip3);
-		printBoards(playerBoard,computerBoard, true);
-		*/
-		//TEST SHIP INITS
-		/*
-		initializePlayerBoard(playerBoard);
-		initializeComputerBoard(computerBoard);
-		printBoards(playerBoard,computerBoard, false);
-		*/
+		System.out.println("Game over! The "+ (playerWon?"Player":"Computer") + " won!");
+		System.out.println("Game took "+turns+" turns.");
 		
+
+		
+	}
+
+	public static boolean playerTurn(char[][] enemyBoard, Ship[] enemyShips)
+	{
+		Scanner scan = new Scanner(System.in);
+		Boolean valid = false;
+		String coord;
+		do
+		{
+			System.out.print("Please select a target: ");
+			coord = scan.nextLine().toUpperCase();
+			if(coord.matches("[0-9][A-J]")){valid=true;}
+			if(coord.equals("Q")||coord.equals("QUIT")){System.exit(0);}
+			if(!valid){System.out.println("Invalid placement, please try again.\n");}
+		}while(!valid);
+		boolean hit = fire(coord, enemyBoard);
+		int[] yx = coordsToInt(coord);
+		if(hit)
+		{
+			System.out.println("HIT!");
+			enemyBoard[yx[0]][yx[1]] = 'X';
+			for(Ship s : enemyShips)
+			{
+				if(s.contains(coord))
+				{
+					s.shoot(coord);
+					if(s.sunk){System.out.println("You sunk my "+s.name+"!");break;}
+				}
+			}
+			if(checkWin(enemyShips)){return true;}
+		}
+		else
+		{
+			//miss
+			System.out.println("Miss!");
+			enemyBoard[yx[0]][yx[1]] = 'o';
+		}
+		//System.out.println("Enter to Continue");
+		//scan.nextLine();
+		return false;
+	}
+
+	public static boolean computerTurn(char[][] enemyBoard, Ship[] enemyShips)
+	{
+
+		String coord = computerGuess(enemyBoard, enemyShips);
+		boolean hit = fire(coord, enemyBoard);
+		int[] yx = coordsToInt(coord);
+		if(hit)
+		{
+			System.out.println("THE COMPUTER HIT! ("+coord+")");
+			enemyBoard[yx[0]][yx[1]] = 'X';
+			for(Ship s : enemyShips)
+			{
+				if(s.contains(coord))
+				{
+					s.shoot(coord);
+					if(s.sunk){System.out.println("The opponent sunk your "+s.name+"!");break;}
+				}
+			}
+			if(checkWin(enemyShips)){return true;}
+		}
+		else
+		{
+			//miss
+			System.out.println("The computer missed! ("+coord+")");
+			enemyBoard[yx[0]][yx[1]] = 'o';
+		}
+		return false;
+	}
+
+	public static String computerGuess(char[][] enemyBoard, Ship[] enemyShips)
+	{
+		//implement better AI here
+		Random r = new Random();
+		int[] guess = new int[2];
+		guess[0] = r.nextInt(10);
+		guess[1] = r.nextInt(10);
+		return intToCoords(guess);
+	}
+
+	public static boolean fire(String coord, char[][] targetBoard)
+	{
+		//return if the shot will hit or miss
+		int[] yx = coordsToInt(coord);
+		return (targetBoard[yx[0]][yx[1]] == '#');
+	}
+
+	public static boolean checkWin(Ship[] ships)
+	{
+		for(Ship s : ships)
+		{
+			if(!s.sunk){return false;}
+		}
+		return true;
 	}
 
 	public static void printBoards(char[][] player, char[][] computer, boolean hideEnemy)
@@ -171,7 +251,7 @@ public class Battleship
 		do
 		{
 			System.out.print("Please place your "+name+" (size: "+size+"): ");
-			coord = scan.nextLine();
+			coord = scan.nextLine().toUpperCase();
 			if(size == 1){direction = 0;}
 			else
 			{
@@ -179,7 +259,7 @@ public class Battleship
 				direction = scan.nextInt();
 				scan.nextLine(); //consume newline on int input
 			}
-			if(coord.matches("[0-9][A-Ja-j]") && direction >= 0 && direction <4)
+			if(coord.matches("[0-9][A-J]") && direction >= 0 && direction <4)
 			{
 				valid = validPlacement(board, coord, direction, size);
 			}
