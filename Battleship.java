@@ -15,11 +15,12 @@ public class Battleship
 		boolean playerWon = false;
 		boolean computerWon = false;
 		int turns = 1;
+		BattleshipAI ai = new BattleshipAI(1);
 		while(!playerWon && !computerWon)
 		{
 			playerWon = playerTurn(computerBoard, computerShips);
 			//printBoards(playerBoard,computerBoard, true);
-			computerWon = computerTurn(playerBoard, computerShips);
+			computerWon = computerTurn(playerBoard, playerShips, ai);
 			printBoards(playerBoard,computerBoard, true);
 			turns++;
 		}
@@ -71,10 +72,11 @@ public class Battleship
 		return false;
 	}
 
-	public static boolean computerTurn(char[][] enemyBoard, Ship[] enemyShips)
+	public static boolean computerTurn(char[][] enemyBoard, Ship[] enemyShips, BattleshipAI ai)
 	{
 
-		String coord = computerGuess(enemyBoard, enemyShips);
+		//String coord = ai.randomGuess(enemyBoard, enemyShips);
+		String coord = ai.shipGuess(enemyBoard, enemyShips);
 		boolean hit = fire(coord, enemyBoard);
 		int[] yx = coordsToInt(coord);
 		if(hit)
@@ -98,16 +100,6 @@ public class Battleship
 			enemyBoard[yx[0]][yx[1]] = 'o';
 		}
 		return false;
-	}
-
-	public static String computerGuess(char[][] enemyBoard, Ship[] enemyShips)
-	{
-		//implement better AI here
-		Random r = new Random();
-		int[] guess = new int[2];
-		guess[0] = r.nextInt(10);
-		guess[1] = r.nextInt(10);
-		return intToCoords(guess);
 	}
 
 	public static boolean fire(String coord, char[][] targetBoard)
