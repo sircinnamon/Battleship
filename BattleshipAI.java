@@ -20,6 +20,7 @@ public class BattleshipAI
 		int[] guess = new int[2];
 		guess[0] = r.nextInt(10);
 		guess[1] = r.nextInt(10);
+		if(enemyBoard[guess[0]][guess[1]] == 'X' || enemyBoard[guess[0]][guess[1]] == 'o'){return randomGuess(enemyBoard,enemyShips);}
 		return Battleship.intToCoords(guess);
 	}
 
@@ -90,8 +91,9 @@ public class BattleshipAI
 		System.out.print("Prime Targets: ");
 		printList(primeTargets);
 		*/
-		if(primeTargets.size() != 0){return primeTargets.get(0);}
-		if(targets.size() != 0){return targets.get(0);}
+		Random r = new Random();
+		if(primeTargets.size() != 0){return primeTargets.get(r.nextInt(primeTargets.size()));}
+		if(targets.size() != 0){return targets.get(r.nextInt(primeTargets.size());}
 		return randomGuess(enemyBoard,enemyShips);
 	}	
 
